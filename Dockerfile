@@ -5,12 +5,16 @@ FROM python:3.9 as intermediate
 # To specify main repo
 ARG MAIN_REPO
 ENV MAIN_REPO $MAIN_REPO
+ARG SSH_PRIVATE_KEY
+ENV SSH_PRIVATE_KEY $SSH_PRIVATE_KEY
+ARG CHAIN_PEM
+ENV CHAIN_PEM $CHAIN_PEM
 
 # Create private SSH key in container
 RUN mkdir /root/.ssh/
-#RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
+RUN echo "${SSH_PRIVATE_KEY}" > /root/.ssh/id_rsa
 #ADD id_rsa /root/.ssh/id_rsa
-RUN curl http://192.168.221.188:5000/docker-files/ssh_key --user "admin:admin" --output /root/.ssh/id_rsa
+#RUN curl http://192.168.221.188:5000/docker-files/ssh_key --user "admin:admin" --output /root/.ssh/id_rsa
 RUN chmod 600 /root/.ssh/id_rsa
 RUN touch /root/.ssh/known_hosts
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
@@ -23,7 +27,8 @@ RUN git clone git@github.com:ThomFri/smarthome_modules.git /app/smarthome_module
 # COPY ./cert/chain.pem /app/resources/cert/chain.pem
 RUN mkdir /app/resources
 RUN mkdir /app/resources/cert
-RUN curl http://192.168.221.188:5000/docker-files/chain --user "admin:admin" --output /app/resources/cert/chain.pem
+# RUN curl http://192.168.221.188:5000/docker-files/chain --user "admin:admin" --output /app/resources/cert/chain.pem
+RUN echo "${CHAIN_PEM}" > /app/resources/cert/chain.pem
 
 # Remove SSH key
 RUN rm /root/.ssh/id_rsa
